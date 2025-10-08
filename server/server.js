@@ -1,4 +1,3 @@
-// ===== Imports =====
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -7,9 +6,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
-require('dotenv').config({ path: __dirname + '/../.env' }); // Load .env once
+require('dotenv').config({ path: __dirname + '/../.env' });
 
-// ===== App Setup =====
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -17,34 +15,23 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 
-// ===== Debug: Check if .env is working =====
 console.log("MONGO_URI from env:", process.env.MONGO_URI);
 console.log("EMAIL_USER from env:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS loaded:", !!process.env.EMAIL_PASS);
 
-// ===== MongoDB Connection =====
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err);
-  });
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ===== Load User Model =====
 const User = require('./models/User');
+const otpStore = {};
 
-// ===== In-Memory OTP Store =====
-const otpStore = {}; // { email: { code, expires, verified, otpToken } }
-
-// ===== Send OTP =====
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.json({ success: false, message: 'Email is required.' });
 
   const otp = crypto.randomInt(100000, 999999).toString();
   const expires = Date.now() + 5 * 60 * 1000;
-
   otpStore[email] = { code: otp, expires };
 
   const transporter = nodemailer.createTransport({
@@ -67,12 +54,10 @@ app.post('/send-otp', async (req, res) => {
     res.json({ success: true, message: 'OTP sent to Gmail.' });
   } catch (err) {
     console.error("❌ Nodemailer error:", err.message);
-    if (err.response) console.error("SMTP response:", err.response);
     res.json({ success: false, message: 'Failed to send OTP.' });
   }
 });
 
-// ===== Verify OTP =====
 app.post('/verify-otp', (req, res) => {
   const { email, code } = req.body;
   const record = otpStore[email];
@@ -89,7 +74,6 @@ app.post('/verify-otp', (req, res) => {
   res.json({ success: true, message: 'OTP verified.', otpToken });
 });
 
-// ===== Register User =====
 app.post('/register', async (req, res) => {
   const { name, email, password, otpToken } = req.body;
   const record = otpStore[email];
@@ -104,16 +88,13 @@ app.post('/register', async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.json({ success: false, message: 'User already exists.' });
-    }
+    if (existingUser) return res.json({ success: false, message: 'User already exists.' });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({ name, email, passwordHash });
     await newUser.save();
 
     delete otpStore[email];
-
     res.json({ success: true, message: 'Registration successful.' });
   } catch (err) {
     console.error('❌ Registration error:', err.message);
@@ -121,7 +102,6 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// ===== Login User =====
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   console.log("🔐 Login attempt:", email);
@@ -132,16 +112,10 @@ app.post('/login', async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) {
-      console.warn("⚠️ User not found:", email);
-      return res.json({ success: false, message: 'User not found.' });
-    }
+    if (!user) return res.json({ success: false, message: 'User not found.' });
 
     const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) {
-      console.warn("⚠️ Incorrect password for:", email);
-      return res.json({ success: false, message: 'Incorrect password.' });
-    }
+    if (!match) return res.json({ success: false, message: 'Incorrect password.' });
 
     res.json({
       success: true,
@@ -154,46 +128,10 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// ===== Start Server =====
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-async function handleLogin() {
-  setLoading(true); // disable button
-
-  try {
-    const response = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: emailInput.value,
-        password: passwordInput.value
-      })
-    });
-
-    const data = await response.json();
-    setLoading(false); // re-enable button
-
-    if (data.success) {
-      alert("✅ Login successful!");
-      // Redirect to dashboard or save user info
-      console.log("Logged in user:", data.user);
-    } else {
-      alert(data.message); // shows "User not found" or "Incorrect password"
-    }
-  } catch (err) {
-    setLoading(false);
-    console.error("Login request failed:", err);
-    alert("Server error during login."); // only shows once
-  }
-}
-
-
-function handleModalClose() {
-  setShowErrorModal(false); // ✅ prevents looping
-}
-
 app.get('/', (req, res) => {
   res.send('vvAuth backend is live and secure 🔐🚀');
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
