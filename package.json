@@ -1,7 +1,7 @@
 {
   "name": "vvAuth-backend",
   "version": "1.0.0",
-  "description": "Backend for OTP authentication system with AI Q&A",
+  "description": "Backend for OTP authentication system",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
