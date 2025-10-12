@@ -7,7 +7,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Resend } = require('resend');
 const { User, OTP } = require('./models/User'); // Your Mongoose models
-const OpenAI = require('openai');
+const OpenAI = require("openai");
 
 // ---------- Initialize ----------
 const app = express();
@@ -26,13 +26,15 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("✅ MongoDB connected"))
 .catch(err => console.error("❌ MongoDB connection error:", err.message));
 
-// -------------------- SEND OTP --------------------
+/* ----------------- ROUTES ----------------- */
+
+// ---------- SEND OTP ----------
 app.post('/send-otp', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
 
   const otp = crypto.randomInt(100000, 999999).toString();
-  const expires = Date.now() + 5 * 60 * 1000; // 5 min expiry
+  const expires = Date.now() + 5 * 60 * 1000; // 5 min
 
   try {
     await OTP.findOneAndUpdate(
@@ -43,7 +45,7 @@ app.post('/send-otp', async (req, res) => {
 
     res.json({ success: true, message: 'OTP sent successfully to your Gmail!' });
 
-    // Send email in background
+    // Send email asynchronously
     resend.emails.send({
       from: 'V.V Maharashtra Board <onboarding@resend.dev>',
       to: email,
@@ -139,7 +141,6 @@ app.post("/ask", async (req, res) => {
 
     const answer = completion.choices[0].message.content;
     res.json({ answer });
-
   } catch (err) {
     console.error("❌ AI error:", err.message);
     res.status(500).json({ answer: "Error generating answer." });
