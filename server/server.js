@@ -10,8 +10,8 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const { Resend } = require('resend');
 
-const User = require('./module/user'); // server/module/user.js
-const OTP = require('./module/otp');   // server/module/otp.js
+const User = require('./models/User');
+const OTP = require('./models/OTP');
 
 
 const app = express();
