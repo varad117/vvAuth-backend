@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Resend } = require("resend");
-const { User, OTP } = require("../models/User");
+const { User, OTP } = require("./models/User");
 const OpenAI = require("openai");
 
 // ---------- Initialize ----------
