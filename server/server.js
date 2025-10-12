@@ -5,9 +5,9 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { Resend } = require('resend');   // npm install resend
+const { Resend } = require('resend');
 const { User, OTP } = require('./models/User'); // Your Mongoose models
-const OpenAI = require("openai"); // Updated import style
+const OpenAI = require('openai');
 
 // ---------- Initialize ----------
 const app = express();
@@ -43,6 +43,7 @@ app.post('/send-otp', async (req, res) => {
 
     res.json({ success: true, message: 'OTP sent successfully to your Gmail!' });
 
+    // Send email in background
     resend.emails.send({
       from: 'V.V Maharashtra Board <onboarding@resend.dev>',
       to: email,
@@ -52,7 +53,7 @@ app.post('/send-otp', async (req, res) => {
       .catch(err => console.error(`❌ Failed to send OTP email:`, err.message));
 
   } catch (err) {
-    console.error(`❌ /send-otp error:`, err.message);
+    console.error("❌ /send-otp error:", err.message);
     res.status(500).json({ success: false, message: 'Failed to send OTP' });
   }
 });
@@ -146,4 +147,4 @@ app.post("/ask", async (req, res) => {
 });
 
 // ---------- START SERVER ----------
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
