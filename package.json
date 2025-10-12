@@ -1,7 +1,7 @@
 {
   "name": "vvAuth-backend",
   "version": "1.0.0",
-  "description": "Backend for OTP authentication system",
+  "description": "Backend for OTP authentication system with AI Q&A",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
@@ -10,15 +10,16 @@
   "author": "Varad Ashok Manwatkar",
   "license": "MIT",
   "dependencies": {
-    "@vercel/analytics": "^1.5.0",
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.20.2",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
     "helmet": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.5.0",
+    "mongoose": "^7.8.7",
+    "openai": "^6.3.0",
     "resend": "^6.1.2"
   },
   "devDependencies": {
